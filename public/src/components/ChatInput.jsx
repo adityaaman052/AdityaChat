@@ -52,7 +52,7 @@ const Container = styled.div`
   display: grid;
   align-items: center;
   grid-template-columns: 5% 95%;
-  background-color: #080420;
+  background-color:rgb(44, 33, 9);
   padding: 0 2rem;
   @media screen and (min-width: 720px) and (max-width: 1080px) {
     padding: 0 1rem;
@@ -73,14 +73,14 @@ const Container = styled.div`
       .emoji-picker-react {
         position: absolute;
         top: -350px;
-        background-color: #080420;
-        box-shadow: 0 5px 10px #9a86f3;
-        border-color: #9a86f3;
+        background-color:rgb(0, 0, 0);
+        box-shadow: 0 5px 10px rgb(182, 236, 58);;
+        border-color: rgb(182, 236, 58);;
         .emoji-scroll-wrapper::-webkit-scrollbar {
-          background-color: #080420;
+          background-color:rgb(0, 0, 0);
           width: 5px;
           &-thumb {
-            background-color: #9a86f3;
+            background-color: rgb(182, 236, 58);;
           }
         }
         .emoji-categories {
@@ -90,10 +90,10 @@ const Container = styled.div`
         }
         .emoji-search {
           background-color: transparent;
-          border-color: #9a86f3;
+          border-color: rgb(182, 236, 58);;
         }
         .emoji-group:before {
-          background-color: #080420;
+          background-color:rgb(0, 0, 0);
         }
       }
     }
@@ -104,7 +104,7 @@ const Container = styled.div`
     display: flex;
     align-items: center;
     gap: 2rem;
-    background-color: #ffffff34;
+    background-color:rgba(137, 207, 24, 0.2);
     input {
       width: 90%;
       height: 60%;
@@ -115,7 +115,7 @@ const Container = styled.div`
       font-size: 1.2rem;
 
       &::selection {
-        background-color: #9a86f3;
+        background-color:rgb(182, 236, 58);
       }
       &:focus {
         outline: none;
@@ -127,7 +127,7 @@ const Container = styled.div`
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #9a86f3;
+      background-color: rgb(205, 231, 40);;
       border: none;
       @media screen and (min-width: 720px) and (max-width: 1080px) {
         padding: 0.3rem 1rem;
@@ -137,7 +137,7 @@ const Container = styled.div`
       }
       svg {
         font-size: 2rem;
-        color: white;
+        color: black;
       }
     }
   }

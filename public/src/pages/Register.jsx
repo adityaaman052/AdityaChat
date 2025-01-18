@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
-import Logo from "../assets/logo.svg";
+import Logo from "../assets/wechat.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { registerRoute } from "../utils/APIRoutes";
@@ -90,7 +90,7 @@ export default function Register() {
         <form action="" onSubmit={(event) => handleSubmit(event)}>
           <div className="brand">
             <img src={Logo} alt="logo" />
-            <h1>snappy</h1>
+            <h1>TalkTime</h1>
           </div>
           <input
             type="text"
@@ -118,7 +118,7 @@ export default function Register() {
           />
           <button type="submit">Create User</button>
           <span>
-            Already have an account ? <Link to="/login">Login.</Link>
+            Already have an account? <Link to="/login">Login</Link>
           </span>
         </form>
       </FormContainer>
@@ -133,20 +133,23 @@ const FormContainer = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1rem;
   align-items: center;
-  background-color: #131324;
+  background: linear-gradient(135deg, #1a1a1a, #333333);
+
   .brand {
     display: flex;
     align-items: center;
     gap: 1rem;
     justify-content: center;
     img {
-      height: 5rem;
+      height: 6rem;
     }
     h1 {
-      color: white;
+      color: #ffd700;
+      font-size: 3rem;
+      font-family: "Poppins", sans-serif;
       text-transform: uppercase;
+      letter-spacing: 0.2rem;
     }
   }
 
@@ -154,42 +157,54 @@ const FormContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    background-color: #00000076;
-    border-radius: 2rem;
-    padding: 3rem 5rem;
+    background-color: rgba(56, 57, 30, 0.8);
+    border-radius: 1.5rem;
+    padding: 4rem 3rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   }
+
   input {
     background-color: transparent;
     padding: 1rem;
-    border: 0.1rem solid #4e0eff;
-    border-radius: 0.4rem;
-    color: white;
+    border: 0.1rem solid #ffd700;
+    border-radius: 0.5rem;
+    color: #ffd700;
     width: 100%;
     font-size: 1rem;
+    font-family: "Roboto", sans-serif;
+    transition: border 0.3s ease;
+
     &:focus {
-      border: 0.1rem solid #997af0;
+      border: 0.1rem solid #ffc107;
       outline: none;
+      box-shadow: 0 0 8px #ffd700;
     }
   }
+
   button {
-    background-color: #4e0eff;
-    color: white;
+    background-color: rgb(245, 242, 61);
+    color: #1a1a1a;
     padding: 1rem 2rem;
     border: none;
     font-weight: bold;
     cursor: pointer;
-    border-radius: 0.4rem;
-    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-size: 1.2rem;
     text-transform: uppercase;
+    font-family: "Poppins", sans-serif;
+    transition: background-color 0.3s ease;
+
     &:hover {
-      background-color: #4e0eff;
+      background-color: #ffc107;
     }
   }
+
   span {
-    color: white;
-    text-transform: uppercase;
+    color: #ffd700;
+    font-family: "Roboto", sans-serif;
+    font-size: 1rem;
     a {
-      color: #4e0eff;
+      color: #ffc107;
       text-decoration: none;
       font-weight: bold;
     }
