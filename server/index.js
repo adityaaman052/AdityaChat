@@ -12,6 +12,7 @@ app.use(
   cors({
     origin: "https://aditya-chat-frontend.vercel.app", // Your deployed frontend URL
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Include OPTIONS for preflight
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Allow credentials (e.g., cookies, headers)
   })
 );
