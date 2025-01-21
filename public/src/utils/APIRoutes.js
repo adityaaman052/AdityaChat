@@ -1,4 +1,4 @@
-export const host = "https://aditya-chat-api.vercel.app/";
+export const host = "https://aditya-chat-api.vercel.app";
 export const loginRoute = `${host}/api/auth/login`;
 export const registerRoute = `${host}/api/auth/register`;
 export const logoutRoute = `${host}/api/auth/logout`;
