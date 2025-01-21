@@ -7,14 +7,17 @@ const app = express();
 const socket = require("socket.io");
 require("dotenv").config();
 
-// Update CORS policy for Express server
+// Configure CORS for Express server
 app.use(
   cors({
     origin: "https://aditya-chat-frontend.vercel.app", // Your deployed frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Include OPTIONS for preflight
     credentials: true, // Allow credentials (e.g., cookies, headers)
   })
 );
+
+// Handle preflight requests
+app.options("*", cors()); // Allow preflight for all routes
 
 app.use(express.json());
 
