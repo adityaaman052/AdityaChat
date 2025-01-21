@@ -27,7 +27,7 @@ export default function Register() {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/");
     }
-  }, []);
+  }, [navigate]);
 
   const handleChange = (event) => {
     setValues({ ...values, [event.target.name]: event.target.value });
@@ -37,7 +37,7 @@ export default function Register() {
     const { password, confirmPassword, username, email } = values;
     if (password !== confirmPassword) {
       toast.error(
-        "Password and confirm password should be same.",
+        "Password and confirm password should be the same.",
         toastOptions
       );
       return false;
@@ -49,7 +49,7 @@ export default function Register() {
       return false;
     } else if (password.length < 8) {
       toast.error(
-        "Password should be equal or greater than 8 characters.",
+        "Password should be equal to or greater than 8 characters.",
         toastOptions
       );
       return false;
@@ -65,21 +65,36 @@ export default function Register() {
     event.preventDefault();
     if (handleValidation()) {
       const { email, username, password } = values;
-      const { data } = await axios.post(registerRoute, {
-        username,
-        email,
-        password,
-      });
 
-      if (data.status === false) {
-        toast.error(data.msg, toastOptions);
-      }
-      if (data.status === true) {
-        localStorage.setItem(
-          process.env.REACT_APP_LOCALHOST_KEY,
-          JSON.stringify(data.user)
-        );
-        navigate("/");
+      try {
+        const { data } = await axios.post(registerRoute, {
+          username,
+          email,
+          password,
+        });
+
+        if (data.status === false) {
+          toast.error(data.msg, toastOptions);
+        }
+        if (data.status === true) {
+          localStorage.setItem(
+            process.env.REACT_APP_LOCALHOST_KEY,
+            JSON.stringify(data.user)
+          );
+          navigate("/");
+        }
+      } catch (err) {
+        // Handle network or server errors
+        if (err.response) {
+          // The request was made and the server responded with an error status code
+          toast.error(`Error: ${err.response.data.msg}`, toastOptions);
+        } else if (err.request) {
+          // The request was made but no response was received
+          toast.error("Network Error: Server is not reachable", toastOptions);
+        } else {
+          // Something happened in setting up the request
+          toast.error(`Error: ${err.message}`, toastOptions);
+        }
       }
     }
   };
@@ -87,7 +102,7 @@ export default function Register() {
   return (
     <>
       <FormContainer>
-        <form action="" onSubmit={(event) => handleSubmit(event)}>
+        <form action="" onSubmit={handleSubmit}>
           <div className="brand">
             <img src={Logo} alt="logo" />
             <h1>TalkTime</h1>
@@ -96,25 +111,25 @@ export default function Register() {
             type="text"
             placeholder="Username"
             name="username"
-            onChange={(e) => handleChange(e)}
+            onChange={handleChange}
           />
           <input
             type="email"
             placeholder="Email"
             name="email"
-            onChange={(e) => handleChange(e)}
+            onChange={handleChange}
           />
           <input
             type="password"
             placeholder="Password"
             name="password"
-            onChange={(e) => handleChange(e)}
+            onChange={handleChange}
           />
           <input
             type="password"
             placeholder="Confirm Password"
             name="confirmPassword"
-            onChange={(e) => handleChange(e)}
+            onChange={handleChange}
           />
           <button type="submit">Create User</button>
           <span>
