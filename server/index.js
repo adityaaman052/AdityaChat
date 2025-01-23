@@ -14,6 +14,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Include OPTIONS for preflight
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Allow credentials (e.g., cookies, headers)
+    preflightContinue: true,
   })
 );
 
