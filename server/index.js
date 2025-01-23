@@ -36,7 +36,7 @@ app.use(express.json()); // Middleware to parse JSON requests
 // MongoDB connection
 console.log("Attempting to connect to MongoDB...");
 mongoose
-  .connect(process.env.MONGO_URL, {
+  .connect("mongodb+srv://newproject:Anurag01126@cluster0.a9bgj.mongodb.net/chatadi?retryWrites=true&w=majority", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
