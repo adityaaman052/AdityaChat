@@ -8,6 +8,17 @@ require("dotenv").config();
 
 const app = express();
 
+// Log to check if environment variables are loaded
+console.log("Environment Variables:");
+console.log("PORT:", process.env.PORT);
+console.log("MONGO_URL:", process.env.MONGO_URL);
+
+// Fail-safe for missing MONGO_URL
+if (!process.env.MONGO_URL) {
+  console.error("Error: MONGO_URL is not defined in environment variables.");
+  process.exit(1); // Exit the process if MONGO_URL is missing
+}
+
 // Configure CORS for Express server
 app.use(
   cors({
@@ -23,6 +34,7 @@ app.options("*", cors()); // Handle preflight requests
 app.use(express.json()); // Middleware to parse JSON requests
 
 // MongoDB connection
+console.log("Attempting to connect to MongoDB...");
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
@@ -65,14 +77,18 @@ io.on("connection", (socket) => {
 
   // Add user to online users map
   socket.on("add-user", (userId) => {
+    console.log(`User added: ${userId}`);
     global.onlineUsers.set(userId, socket.id);
   });
 
   // Handle message sending to specific users
   socket.on("send-msg", (data) => {
+    console.log(`Message from ${data.from} to ${data.to}: ${data.msg}`);
     const sendUserSocket = global.onlineUsers.get(data.to);
     if (sendUserSocket) {
       socket.to(sendUserSocket).emit("msg-recieve", data.msg);
+    } else {
+      console.log(`User ${data.to} is not online.`);
     }
   });
 
@@ -82,6 +98,7 @@ io.on("connection", (socket) => {
     // Optional: remove user from online users map
     global.onlineUsers.forEach((socketId, userId) => {
       if (socketId === socket.id) {
+        console.log(`User disconnected: ${userId}`);
         global.onlineUsers.delete(userId);
       }
     });
