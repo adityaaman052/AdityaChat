@@ -48,6 +48,10 @@ mongoose
 
 // Test endpoint
 app.get("/ping", (_req, res) => res.json({ msg: "Ping Successful" }));
+app.get("/", (req, res) => {
+  res.send("Welcome to Aditya Chat API!");
+});
+
 
 // API routes
 app.use("/api/auth", authRoutes);
