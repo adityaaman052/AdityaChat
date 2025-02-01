@@ -1,16 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
-import styled from "styled-components";
-import { allUsersRoute, host } from "../utils/APIRoutes";
+import { allUsersRoute } from "../utils/APIRoutes";
 import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
+import { useSocket } from "../components/useSocket";
+import styled from "styled-components"; // Make sure this is at the top of your file
 
 export default function Chat() {
   const navigate = useNavigate();
-  const socket = useRef(null);
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
@@ -29,32 +28,16 @@ export default function Chat() {
     fetchUser();
   }, [navigate]);
 
-  // Initialize Socket.IO connection
-  useEffect(() => {
-    if (currentUser) {
-      socket.current = io(host);
-      socket.current.emit("add-user", currentUser._id);
+  // Use custom socket hook
+  const socket = useSocket(currentUser, setMessages);
 
-      const handleReceiveMessage = (msg) => {
-        setMessages((prevMessages) => [...prevMessages, msg]);
-      };
-
-      socket.current.on("msg-recieve", handleReceiveMessage);
-
-      return () => {
-        socket.current.off("msg-recieve", handleReceiveMessage);
-        socket.current.disconnect();
-      };
-    }
-  }, [currentUser]);
-
-  // Fetch contacts
+  // Fetch contacts from server
   useEffect(() => {
     const fetchContacts = async () => {
       if (currentUser) {
         if (currentUser.isAvatarImageSet) {
-          const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-          setContacts(data.data);
+          const { data } = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+          setContacts(data);
         } else {
           navigate("/setAvatar");
         }
@@ -63,13 +46,14 @@ export default function Chat() {
     fetchContacts();
   }, [currentUser, navigate]);
 
-  // Handle chat change
+  // Handle changing chat
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
   };
 
+  // Function to send a message
   const sendMessage = (message) => {
-    if (currentChat) {
+    if (currentChat && socket.current) {
       socket.current.emit("send-msg", {
         from: currentUser._id,
         to: currentChat._id,
