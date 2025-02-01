@@ -22,6 +22,15 @@ export const useSocket = (currentUser, setMessages) => {
         socket.current.on("msg-recieve", (msg) => {
           setMessages((prevMessages) => [...prevMessages, msg]);
         });
+
+        // Handle reconnection attempts
+        socket.current.on("reconnect_attempt", () => {
+          console.log("Reconnecting...");
+        });
+
+        socket.current.on("reconnect_error", (error) => {
+          console.error("Reconnection failed:", error);
+        });
       }
 
       // Cleanup function to disconnect and remove listeners
