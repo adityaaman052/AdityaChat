@@ -14,9 +14,7 @@ export default function Chat() {
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
-  const [messages, setMessages] = useState([]);  // For storing messages
 
-  // Fetch current user from localStorage
   useEffect(() => {
     const fetchUser = async () => {
       const localStorageKey = process.env.REACT_APP_LOCALHOST_KEY || "chat-user";
@@ -29,51 +27,28 @@ export default function Chat() {
     fetchUser();
   }, [navigate]);
 
-  // Initialize Socket.IO connection
   useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
-
-      // Listen for incoming messages
-      socket.current.on("msg-recieve", (msg) => {
-        setMessages((prevMessages) => [...prevMessages, msg]);
-      });
-
-      return () => {
-        socket.current.disconnect(); // Cleanup function
-      };
+      return () => socket.current.disconnect();
     }
   }, [currentUser]);
 
-  // Fetch contacts
   useEffect(() => {
     const fetchContacts = async () => {
-      if (currentUser) {
-        if (currentUser.isAvatarImageSet) {
-          const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-          setContacts(data.data);
-        } else {
-          navigate("/setAvatar");
-        }
+      if (currentUser && currentUser.isAvatarImageSet) {
+        const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+        setContacts(data.data);
+      } else {
+        navigate("/setAvatar");
       }
     };
     fetchContacts();
   }, [currentUser, navigate]);
 
-  // Handle chat change
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
-  };
-
-  const sendMessage = (message) => {
-    if (currentChat) {
-      socket.current.emit("send-msg", { 
-        from: currentUser._id, 
-        to: currentChat._id, 
-        msg: message 
-      });
-    }
   };
 
   return (
@@ -83,12 +58,7 @@ export default function Chat() {
         {currentChat === undefined ? (
           <Welcome />
         ) : (
-          <ChatContainer 
-            currentChat={currentChat} 
-            socket={socket} 
-            sendMessage={sendMessage} 
-            messages={messages} // Pass messages to ChatContainer
-          />
+          <ChatContainer currentChat={currentChat} socket={socket} />
         )}
       </div>
     </Container>
