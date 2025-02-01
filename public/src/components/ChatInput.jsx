@@ -7,6 +7,7 @@ import Picker from "emoji-picker-react";
 export default function ChatInput({ handleSendMsg }) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
   };
@@ -25,18 +26,39 @@ export default function ChatInput({ handleSendMsg }) {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      sendChat(e);
+    }
+  };
+
   return (
     <Container>
       <div className="button-container">
         <div className="emoji">
           <BsEmojiSmileFill onClick={handleEmojiPickerhideShow} />
-          {showEmojiPicker && <Picker onEmojiClick={handleEmojiClick} />}
+          {showEmojiPicker && (
+            <Picker
+              onEmojiClick={handleEmojiClick}
+              pickerStyle={{
+                position: "absolute",
+                top: "40px",
+                backgroundColor: "rgb(0, 0, 0)",
+                boxShadow: "0 5px 10px rgb(182, 236, 58)",
+                borderColor: "rgb(182, 236, 58)",
+              }}
+            />
+          )}
         </div>
       </div>
-      <form className="input-container" onSubmit={(event) => sendChat(event)}>
+      <form
+        className="input-container"
+        onSubmit={sendChat}
+        onKeyDown={handleKeyPress} // Handle Enter key for sending message
+      >
         <input
           type="text"
-          placeholder="type your message here"
+          placeholder="Type your message here"
           onChange={(e) => setMsg(e.target.value)}
           value={msg}
         />
@@ -52,12 +74,13 @@ const Container = styled.div`
   display: grid;
   align-items: center;
   grid-template-columns: 5% 95%;
-  background-color:rgb(44, 33, 9);
+  background-color: rgb(44, 33, 9);
   padding: 0 2rem;
   @media screen and (min-width: 720px) and (max-width: 1080px) {
     padding: 0 1rem;
     gap: 1rem;
   }
+
   .button-container {
     display: flex;
     align-items: center;
@@ -70,41 +93,16 @@ const Container = styled.div`
         color: #ffff00c8;
         cursor: pointer;
       }
-      .emoji-picker-react {
-        position: absolute;
-        top: -350px;
-        background-color:rgb(0, 0, 0);
-        box-shadow: 0 5px 10px rgb(182, 236, 58);;
-        border-color: rgb(182, 236, 58);;
-        .emoji-scroll-wrapper::-webkit-scrollbar {
-          background-color:rgb(0, 0, 0);
-          width: 5px;
-          &-thumb {
-            background-color: rgb(182, 236, 58);;
-          }
-        }
-        .emoji-categories {
-          button {
-            filter: contrast(0);
-          }
-        }
-        .emoji-search {
-          background-color: transparent;
-          border-color: rgb(182, 236, 58);;
-        }
-        .emoji-group:before {
-          background-color:rgb(0, 0, 0);
-        }
-      }
     }
   }
+
   .input-container {
     width: 100%;
     border-radius: 2rem;
     display: flex;
     align-items: center;
     gap: 2rem;
-    background-color:rgba(137, 207, 24, 0.2);
+    background-color: rgba(137, 207, 24, 0.2);
     input {
       width: 90%;
       height: 60%;
@@ -115,7 +113,7 @@ const Container = styled.div`
       font-size: 1.2rem;
 
       &::selection {
-        background-color:rgb(182, 236, 58);
+        background-color: rgb(182, 236, 58);
       }
       &:focus {
         outline: none;
@@ -127,7 +125,7 @@ const Container = styled.div`
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: rgb(205, 231, 40);;
+      background-color: rgb(205, 231, 40);
       border: none;
       @media screen and (min-width: 720px) and (max-width: 1080px) {
         padding: 0.3rem 1rem;

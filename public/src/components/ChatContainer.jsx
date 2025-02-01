@@ -22,7 +22,7 @@ export default function ChatContainer({ currentChat, socket }) {
         setMessages(response.data);
       }
     };
-    fetchMessages();
+    if (currentChat) fetchMessages(); // Added check to fetch only if currentChat exists
   }, [currentChat]);
 
   useEffect(() => {
@@ -31,13 +31,22 @@ export default function ChatContainer({ currentChat, socket }) {
         setArrivalMessage({ fromSelf: false, message: msg });
       });
     }
-  }, []);
+
+    return () => {
+      if (socket.current) {
+        socket.current.off("msg-recieve"); // Clean up socket listener
+      }
+    };
+  }, [socket]);
 
   useEffect(() => {
-    arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
+    if (arrivalMessage) {
+      setMessages((prev) => [...prev, arrivalMessage]);
+    }
   }, [arrivalMessage]);
 
   useEffect(() => {
+    // Ensure scrollRef only gets called when messages have changed
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
@@ -55,9 +64,7 @@ export default function ChatContainer({ currentChat, socket }) {
         message: msg,
       });
 
-      const msgs = [...messages];
-      msgs.push({ fromSelf: true, message: msg });
-      setMessages(msgs);
+      setMessages((prev) => [...prev, { fromSelf: true, message: msg }]);
     }
   };
 
@@ -68,7 +75,7 @@ export default function ChatContainer({ currentChat, socket }) {
           <div className="avatar">
             <img
               src={`data:image/svg+xml;base64,${currentChat.avatarImage}`}
-              alt=""
+              alt="avatar"
             />
           </div>
           <div className="username">
@@ -78,21 +85,20 @@ export default function ChatContainer({ currentChat, socket }) {
         <Logout />
       </div>
       <div className="chat-messages">
-        {messages.map((message) => {
-          return (
-            <div ref={scrollRef} key={uuidv4()}>
-              <div
-                className={`message ${
-                  message.fromSelf ? "sended" : "recieved"
-                }`}
-              >
-                <div className="content">
-                  <p>{message.message}</p>
-                </div>
+        {messages.map((message) => (
+          <div key={uuidv4()}>
+            <div
+              className={`message ${
+                message.fromSelf ? "sended" : "recieved"
+              }`}
+            >
+              <div className="content">
+                <p>{message.message}</p>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
+        <div ref={scrollRef} />
       </div>
       <ChatInput handleSendMsg={handleSendMsg} />
     </Container>
