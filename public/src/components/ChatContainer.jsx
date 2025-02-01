@@ -9,6 +9,7 @@ import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
 export default function ChatContainer({ currentChat, socket }) {
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
+  const [arrivalMessage, setArrivalMessage] = useState(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -21,19 +22,31 @@ export default function ChatContainer({ currentChat, socket }) {
         setMessages(response.data);
       }
     };
-    if (currentChat) fetchMessages();
+    if (currentChat) fetchMessages(); // Added check to fetch only if currentChat exists
   }, [currentChat]);
 
   useEffect(() => {
     if (socket.current) {
       socket.current.on("msg-recieve", (msg) => {
-        setMessages((prev) => [...prev, { fromSelf: false, message: msg }]);
+        setArrivalMessage({ fromSelf: false, message: msg });
       });
     }
-    return () => socket.current?.off("msg-recieve");
+
+    return () => {
+      if (socket.current) {
+        socket.current.off("msg-recieve"); // Clean up socket listener
+      }
+    };
   }, [socket]);
 
   useEffect(() => {
+    if (arrivalMessage) {
+      setMessages((prev) => [...prev, arrivalMessage]);
+    }
+  }, [arrivalMessage]);
+
+  useEffect(() => {
+    // Ensure scrollRef only gets called when messages have changed
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
@@ -45,7 +58,6 @@ export default function ChatContainer({ currentChat, socket }) {
         from: user._id,
         msg,
       });
-
       await axios.post(sendMessageRoute, {
         from: user._id,
         to: currentChat._id,
@@ -76,7 +88,9 @@ export default function ChatContainer({ currentChat, socket }) {
         {messages.map((message) => (
           <div key={uuidv4()}>
             <div
-              className={`message ${message.fromSelf ? "sended" : "recieved"}`}
+              className={`message ${
+                message.fromSelf ? "sended" : "recieved"
+              }`}
             >
               <div className="content">
                 <p>{message.message}</p>
@@ -96,6 +110,9 @@ const Container = styled.div`
   grid-template-rows: 10% 80% 10%;
   gap: 0.1rem;
   overflow: hidden;
+  @media screen and (min-width: 720px) and (max-width: 1080px) {
+    grid-template-rows: 15% 70% 15%;
+  }
   .chat-header {
     display: flex;
     justify-content: space-between;
@@ -105,11 +122,15 @@ const Container = styled.div`
       display: flex;
       align-items: center;
       gap: 1rem;
-      .avatar img {
-        height: 3rem;
+      .avatar {
+        img {
+          height: 3rem;
+        }
       }
-      .username h3 {
-        color: white;
+      .username {
+        h3 {
+          color: white;
+        }
       }
     }
   }
@@ -123,18 +144,23 @@ const Container = styled.div`
       width: 0.2rem;
       &-thumb {
         background-color: rgb(44, 33, 9);
+        width: 0.1rem;
         border-radius: 1rem;
       }
     }
     .message {
       display: flex;
+      align-items: center;
       .content {
         max-width: 40%;
         overflow-wrap: break-word;
         padding: 1rem;
         font-size: 1.1rem;
         border-radius: 1rem;
-        color: black;
+        color: rgb(0, 0, 0);
+        @media screen and (min-width: 720px) and (max-width: 1080px) {
+          max-width: 70%;
+        }
       }
     }
     .sended {
