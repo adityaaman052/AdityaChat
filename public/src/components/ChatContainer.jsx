@@ -11,47 +11,19 @@ export default function ChatContainer({ currentChat, socket }) {
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
-  useEffect(async () => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-    const response = await axios.post(recieveMessageRoute, {
-      from: data._id,
-      to: currentChat._id,
-    });
-    setMessages(response.data);
-  }, [currentChat]);
-
   useEffect(() => {
-    const getCurrentChat = async () => {
-      if (currentChat) {
-        await JSON.parse(
-          localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-        )._id;
+    const fetchMessages = async () => {
+      const user = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
+      if (user && currentChat) {
+        const response = await axios.post(recieveMessageRoute, {
+          from: user._id,
+          to: currentChat._id,
+        });
+        setMessages(response.data);
       }
     };
-    getCurrentChat();
+    fetchMessages();
   }, [currentChat]);
-
-  const handleSendMsg = async (msg) => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-    socket.current.emit("send-msg", {
-      to: currentChat._id,
-      from: data._id,
-      msg,
-    });
-    await axios.post(sendMessageRoute, {
-      from: data._id,
-      to: currentChat._id,
-      message: msg,
-    });
-
-    const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg });
-    setMessages(msgs);
-  };
 
   useEffect(() => {
     if (socket.current) {
@@ -68,6 +40,26 @@ export default function ChatContainer({ currentChat, socket }) {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handleSendMsg = async (msg) => {
+    const user = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
+    if (user && currentChat) {
+      socket.current.emit("send-msg", {
+        to: currentChat._id,
+        from: user._id,
+        msg,
+      });
+      await axios.post(sendMessageRoute, {
+        from: user._id,
+        to: currentChat._id,
+        message: msg,
+      });
+
+      const msgs = [...messages];
+      msgs.push({ fromSelf: true, message: msg });
+      setMessages(msgs);
+    }
+  };
 
   return (
     <Container>
@@ -94,7 +86,7 @@ export default function ChatContainer({ currentChat, socket }) {
                   message.fromSelf ? "sended" : "recieved"
                 }`}
               >
-                <div className="content ">
+                <div className="content">
                   <p>{message.message}</p>
                 </div>
               </div>
@@ -145,7 +137,7 @@ const Container = styled.div`
     &::-webkit-scrollbar {
       width: 0.2rem;
       &-thumb {
-        background-color:rgb(44, 33, 9);
+        background-color: rgb(44, 33, 9);
         width: 0.1rem;
         border-radius: 1rem;
       }
@@ -159,7 +151,7 @@ const Container = styled.div`
         padding: 1rem;
         font-size: 1.1rem;
         border-radius: 1rem;
-        color:rgb(0, 0, 0);
+        color: rgb(0, 0, 0);
         @media screen and (min-width: 720px) and (max-width: 1080px) {
           max-width: 70%;
         }
@@ -168,13 +160,13 @@ const Container = styled.div`
     .sended {
       justify-content: flex-end;
       .content {
-        background-color:rgba(200, 231, 21, 0.73);
+        background-color: rgba(200, 231, 21, 0.73);
       }
     }
     .recieved {
       justify-content: flex-start;
       .content {
-        background-color:rgba(178, 241, 32, 0.53);
+        background-color: rgba(178, 241, 32, 0.53);
       }
     }
   }

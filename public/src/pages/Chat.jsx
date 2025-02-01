@@ -14,6 +14,7 @@ export default function Chat() {
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
+  const [messages, setMessages] = useState([]);  // For storing messages
 
   // Fetch current user from localStorage
   useEffect(() => {
@@ -26,13 +27,18 @@ export default function Chat() {
       }
     };
     fetchUser();
-  }, []);
+  }, [navigate]);
 
   // Initialize Socket.IO connection
   useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
+
+      // Listen for incoming messages
+      socket.current.on("msg-recieve", (msg) => {
+        setMessages((prevMessages) => [...prevMessages, msg]);
+      });
 
       return () => {
         socket.current.disconnect(); // Cleanup function
@@ -53,17 +59,37 @@ export default function Chat() {
       }
     };
     fetchContacts();
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
+  // Handle chat change
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
+  };
+
+  const sendMessage = (message) => {
+    if (currentChat) {
+      socket.current.emit("send-msg", { 
+        from: currentUser._id, 
+        to: currentChat._id, 
+        msg: message 
+      });
+    }
   };
 
   return (
     <Container>
       <div className="container">
         <Contacts contacts={contacts} changeChat={handleChatChange} />
-        {currentChat === undefined ? <Welcome /> : <ChatContainer currentChat={currentChat} socket={socket} />}
+        {currentChat === undefined ? (
+          <Welcome />
+        ) : (
+          <ChatContainer 
+            currentChat={currentChat} 
+            socket={socket} 
+            sendMessage={sendMessage} 
+            messages={messages} // Pass messages to ChatContainer
+          />
+        )}
       </div>
     </Container>
   );

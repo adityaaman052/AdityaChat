@@ -10,6 +10,7 @@ import { loginRoute } from "../utils/APIRoutes";
 export default function Login() {
   const navigate = useNavigate();
   const [values, setValues] = useState({ username: "", password: "" });
+
   const toastOptions = {
     position: "bottom-right",
     autoClose: 8000,
@@ -17,28 +18,33 @@ export default function Login() {
     draggable: true,
     theme: "dark",
   };
+
+  // ✅ FIX: Added 'navigate' as a dependency to prevent React Hook warning
   useEffect(() => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/");
     }
-  }, []);
+  }, [navigate]);
 
+  // Handles input change for username & password fields
   const handleChange = (event) => {
     setValues({ ...values, [event.target.name]: event.target.value });
   };
 
+  // Validates user input before sending login request
   const validateForm = () => {
     const { username, password } = values;
     if (username === "") {
-      toast.error("Email and Password is required.", toastOptions);
+      toast.error("Username is required.", toastOptions);
       return false;
     } else if (password === "") {
-      toast.error("Email and Password is required.", toastOptions);
+      toast.error("Password is required.", toastOptions);
       return false;
     }
     return true;
   };
 
+  // Handles form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
@@ -47,15 +53,14 @@ export default function Login() {
         username,
         password,
       });
+
       if (data.status === false) {
         toast.error(data.msg, toastOptions);
-      }
-      if (data.status === true) {
+      } else if (data.status === true) {
         localStorage.setItem(
           process.env.REACT_APP_LOCALHOST_KEY,
           JSON.stringify(data.user)
         );
-
         navigate("/");
       }
     }
@@ -64,7 +69,7 @@ export default function Login() {
   return (
     <>
       <FormContainer>
-        <form action="" onSubmit={(event) => handleSubmit(event)}>
+        <form onSubmit={handleSubmit}>
           <div className="brand">
             <img src={Logo} alt="logo" />
             <h1>TalkTime</h1>
@@ -73,14 +78,14 @@ export default function Login() {
             type="text"
             placeholder="Username"
             name="username"
-            onChange={(e) => handleChange(e)}
+            onChange={handleChange}
             min="3"
           />
           <input
             type="password"
             placeholder="Password"
             name="password"
-            onChange={(e) => handleChange(e)}
+            onChange={handleChange}
           />
           <button type="submit">Log In</button>
           <span>
@@ -93,6 +98,7 @@ export default function Login() {
   );
 }
 
+// Styled Components for styling
 const FormContainer = styled.div`
   height: 100vh;
   width: 100vw;
@@ -148,7 +154,7 @@ const FormContainer = styled.div`
   }
 
   button {
-    background-color:rgb(245, 242, 61);
+    background-color: rgb(245, 242, 61);
     color: #1a1a1a;
     padding: 1rem 2rem;
     border: none;
@@ -166,7 +172,7 @@ const FormContainer = styled.div`
   }
 
   span {
-    color:#ffc107;
+    color: #ffc107;
     font-family: "Roboto", sans-serif;
     font-size: 1rem;
     a {
@@ -176,3 +182,4 @@ const FormContainer = styled.div`
     }
   }
 `;
+
