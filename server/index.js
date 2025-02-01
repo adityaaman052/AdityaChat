@@ -21,7 +21,7 @@ if (!MONGO_URL) {
 // Allowed origins for CORS (local + deployed frontend)
 const allowedOrigins = [
   CLIENT_URL,
-  "https://aditya-chat-frontend.vercel.app"
+  "https://localhost:3000"
 ];
 
 // Configure CORS for API requests

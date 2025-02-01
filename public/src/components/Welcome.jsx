@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Robot from "../assets/robot.gif";
+
 export default function Welcome() {
   const [userName, setUserName] = useState("");
-  useEffect(async () => {
-    setUserName(
-      await JSON.parse(
-        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-      ).username
-    );
+
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
+    if (data?.username) {
+      setUserName(data.username);
+    } else {
+      console.error("No user data found in localStorage");
+    }
   }, []);
+
   return (
     <Container>
       <img src={Robot} alt="" />
       <h1>
-        Welcome, <span>{userName}!</span>
+        Welcome, <span>{userName || "Guest"}</span>!
       </h1>
-      <h3>Please select a chat to Start messaging.</h3>
+      <h3>Please select a chat to start messaging.</h3>
     </Container>
   );
 }
@@ -31,6 +35,6 @@ const Container = styled.div`
     height: 20rem;
   }
   span {
-    color:rgb(223, 237, 63);
+    color: rgb(223, 237, 63);
   }
 `;
