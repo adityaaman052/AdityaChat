@@ -8,7 +8,6 @@ require("dotenv").config();
 
 const app = express();
 
-// Load environment variables
 const PORT = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGO_URL;
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
@@ -18,68 +17,54 @@ if (!MONGO_URL) {
   process.exit(1);
 }
 
-// Allowed origins for CORS (local + deployed frontend)
-const allowedOrigins = [
-  CLIENT_URL,
-  "https://localhost:3000"
-];
+const allowedOrigins = [CLIENT_URL, "https://localhost:3000"];
 
-// Configure CORS for API requests
 app.use(
   cors({
     origin: function (origin, callback) {
+      // Allow requests without an origin (e.g., Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.log(`🚫 Blocked CORS request from: ${origin}`); // Debugging
+        console.error(`🚫 Blocked CORS request from: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, // Allow cookies and credentials
+    credentials: true,
   })
 );
 
-app.options("*", cors()); // Handle preflight requests
-
-// Middleware
+app.options("*", cors()); // Handle preflight requests for all routes
 app.use(express.json());
 
-// Connect to MongoDB
 console.log("🔄 Connecting to MongoDB...");
 mongoose
-  .connect(MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("✅ MongoDB Connected Successfully"))
   .catch((err) => {
     console.error("❌ MongoDB Connection Error:", err.message);
     process.exit(1);
   });
 
-// Test API routes
 app.get("/ping", (_req, res) => res.json({ msg: "Ping Successful" }));
 app.get("/", (req, res) => res.send("🚀 Welcome to Aditya Chat API!"));
 
-// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// Start server
-const server = app.listen(PORT, () =>
-  console.log(`🚀 Server running on port ${PORT}`)
-);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
 
-// Configure Socket.IO with CORS handling
 const io = socket(server, {
   cors: {
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.log(`🚫 Blocked WebSocket connection from: ${origin}`);
+        console.error(`🚫 Blocked WebSocket connection from: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -88,20 +73,16 @@ const io = socket(server, {
   },
 });
 
-// Global map to track online users
 global.onlineUsers = new Map();
 
-// Handle Socket.IO connections
 io.on("connection", (socket) => {
   console.log("🟢 New user connected:", socket.id);
 
-  // Store user in online users map
   socket.on("add-user", (userId) => {
     console.log(`✅ User added: ${userId}`);
     global.onlineUsers.set(userId, socket.id);
   });
 
-  // Handle sending messages
   socket.on("send-msg", (data) => {
     console.log(`📩 Message from ${data.from} to ${data.to}: ${data.msg}`);
     const sendUserSocket = global.onlineUsers.get(data.to);
@@ -112,7 +93,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle user disconnection
   socket.on("disconnect", () => {
     console.log("🔴 User disconnected:", socket.id);
     global.onlineUsers.forEach((socketId, userId) => {
