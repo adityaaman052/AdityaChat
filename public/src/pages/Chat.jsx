@@ -10,11 +10,11 @@ import Welcome from "../components/Welcome";
 
 export default function Chat() {
   const navigate = useNavigate();
-  const socket = useRef();
+  const socket = useRef(null);
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
-  const [messages, setMessages] = useState([]);  // For storing messages
+  const [messages, setMessages] = useState([]);
 
   // Fetch current user from localStorage
   useEffect(() => {
@@ -35,13 +35,15 @@ export default function Chat() {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
 
-      // Listen for incoming messages
-      socket.current.on("msg-recieve", (msg) => {
+      const handleReceiveMessage = (msg) => {
         setMessages((prevMessages) => [...prevMessages, msg]);
-      });
+      };
+
+      socket.current.on("msg-recieve", handleReceiveMessage);
 
       return () => {
-        socket.current.disconnect(); // Cleanup function
+        socket.current.off("msg-recieve", handleReceiveMessage);
+        socket.current.disconnect();
       };
     }
   }, [currentUser]);
@@ -68,10 +70,10 @@ export default function Chat() {
 
   const sendMessage = (message) => {
     if (currentChat) {
-      socket.current.emit("send-msg", { 
-        from: currentUser._id, 
-        to: currentChat._id, 
-        msg: message 
+      socket.current.emit("send-msg", {
+        from: currentUser._id,
+        to: currentChat._id,
+        msg: message,
       });
     }
   };
@@ -83,11 +85,11 @@ export default function Chat() {
         {currentChat === undefined ? (
           <Welcome />
         ) : (
-          <ChatContainer 
-            currentChat={currentChat} 
-            socket={socket} 
-            sendMessage={sendMessage} 
-            messages={messages} // Pass messages to ChatContainer
+          <ChatContainer
+            currentChat={currentChat}
+            socket={socket}
+            sendMessage={sendMessage}
+            messages={messages}
           />
         )}
       </div>
