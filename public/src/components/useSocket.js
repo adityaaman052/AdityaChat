@@ -10,7 +10,7 @@ export const useSocket = (currentUser, setMessages) => {
       // Initialize socket connection only once
       if (!socket.current) {
         socket.current = io(host, {
-          transports: ["websocket"],
+          transports: ["websocket","polling"],
           reconnection: true,
           reconnectionAttempts: 5,
           reconnectionDelay: 3000,
