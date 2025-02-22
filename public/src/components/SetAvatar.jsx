@@ -28,9 +28,7 @@ export default function SetAvatar() {
   }, []);
 
   const setProfilePicture = async () => {
-    if (selectedAvatar === undefined) {
-      toast.error("Please select an avatar", toastOptions);
-    } else {
+   
       const user = await JSON.parse(
         localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
       );
@@ -50,7 +48,7 @@ export default function SetAvatar() {
       } else {
         toast.error("Error setting avatar. Please try again.", toastOptions);
       }
-    }
+    
   };
 
   useEffect(() => {
