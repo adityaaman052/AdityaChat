@@ -7,9 +7,10 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import { setAvatarRoute } from "../utils/APIRoutes";
+
 export default function SetAvatar() {
-  const api = `https://api.multiavatar.com/4645646`;
-  const navigate = useNavigate();
+  const api = `${process.env.REACT_APP_API_HOST}/api/avatar`; // Backend proxy
+    const navigate = useNavigate();
   const [avatars, setAvatars] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedAvatar, setSelectedAvatar] = useState(undefined);
@@ -21,7 +22,7 @@ export default function SetAvatar() {
     theme: "dark",
   };
 
-  useEffect(async () => {
+  useEffect(() => {
     if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY))
       navigate("/login");
   }, []);
@@ -52,18 +53,24 @@ export default function SetAvatar() {
     }
   };
 
-  useEffect(async () => {
-    const data = [];
-    for (let i = 0; i < 4; i++) {
-      const image = await axios.get(
-        `${api}/${Math.round(Math.random() * 1000)}`
-      );
-      const buffer = new Buffer(image.data);
-      data.push(buffer.toString("base64"));
-    }
-    setAvatars(data);
-    setIsLoading(false);
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      const data = [];
+      for (let i = 0; i < 4; i++) {
+        try {
+          const response = await axios.get(`${api}/${Math.round(Math.random() * 1000)}`);
+          const buffer = new Buffer(response.data);
+          data.push(buffer.toString("base64"));
+        } catch (error) {
+          console.error("Error fetching avatar:", error);
+        }
+      }
+      setAvatars(data);
+      setIsLoading(false);
+    };
+    fetchAvatars();
   }, []);
+
   return (
     <>
       {isLoading ? (
@@ -79,14 +86,12 @@ export default function SetAvatar() {
             {avatars.map((avatar, index) => {
               return (
                 <div
-                  className={`avatar ${
-                    selectedAvatar === index ? "selected" : ""
-                  }`}
+                  key={index}
+                  className={`avatar ${selectedAvatar === index ? "selected" : ""}`}
                 >
                   <img
                     src={`data:image/svg+xml;base64,${avatar}`}
                     alt="avatar"
-                    key={avatar}
                     onClick={() => setSelectedAvatar(index)}
                   />
                 </div>
@@ -109,7 +114,7 @@ const Container = styled.div`
   align-items: center;
   flex-direction: column;
   gap: 3rem;
-  background-color:rgb(34, 36, 19);
+  background-color: rgb(34, 36, 19);
   height: 100vh;
   width: 100vw;
 
@@ -144,7 +149,7 @@ const Container = styled.div`
     }
   }
   .submit-btn {
-    background-color:rgb(94, 109, 34);
+    background-color: rgb(94, 109, 34);
     color: white;
     padding: 1rem 2rem;
     border: none;
@@ -154,7 +159,7 @@ const Container = styled.div`
     font-size: 1rem;
     text-transform: uppercase;
     &:hover {
-      background-color:rgb(92, 96, 33);
+      background-color: rgb(92, 96, 33);
     }
   }
 `;
