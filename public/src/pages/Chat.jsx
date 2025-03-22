@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { allUsersRoute } from "../utils/APIRoutes";
@@ -32,19 +32,30 @@ export default function Chat() {
   const socket = useSocket(currentUser, setMessages);
 
   // Fetch contacts from server
-  useEffect(() => {
-    const fetchContacts = async () => {
-      if (currentUser) {
-        if (currentUser.isAvatarImageSet) {
+// Fetch contacts from server
+useEffect(() => {
+  const fetchContacts = async () => {
+    if (currentUser) {
+      console.log("Current User ID:", currentUser._id);
+console.log("API Route:", `${allUsersRoute}/${currentUser._id}`);
+
+      if (currentUser.isAvatarImageSet) {
+        try {
+          console.log("Fetching contacts for:", currentUser._id);  // Debugging
           const { data } = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+          console.log("Contacts fetched:", data);  // Debugging
           setContacts(data);
-        } else {
-          navigate("/setAvatar");
+        } catch (error) {
+          console.error("Error fetching contacts:", error);
         }
+      } else {
+        navigate("/setAvatar");
       }
-    };
-    fetchContacts();
-  }, [currentUser, navigate]);
+    }
+  };
+  fetchContacts();
+}, [currentUser, navigate]);
+
 
   // Handle changing chat
   const handleChatChange = (chat) => {

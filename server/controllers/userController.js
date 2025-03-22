@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const Joi = require("joi"); // For input validation
+const mongoose = require("mongoose");
 
 module.exports = {
   login: async (req, res, next) => {
@@ -83,14 +84,33 @@ module.exports = {
 
   getAllUsers: async (req, res, next) => {
     try {
-      const users = await User.find({ _id: { $ne: req.params.id } }).select(
-        "email username avatarImage _id"
-      );
-      return res.status(200).json(users);
+        const { id } = req.params;
+
+        // Ensure valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ msg: "Invalid user ID" });
+        }
+
+        console.log("Fetching users for ID:", id);
+
+        const users = await User.find({ _id: { $ne: new mongoose.Types.ObjectId(id) } })
+            .select("email username avatarImage _id");
+
+        if (!users.length) {
+            return res.status(404).json({ msg: "No users found" });
+        }
+
+        console.log("Users found:", users);
+        return res.status(200).json(users);
     } catch (ex) {
-      next(ex);
+        console.error("Error fetching users:", ex);
+        next(ex);
     }
-  },
+},
+
+
+  
+  
 
   setAvatar: async (req, res, next) => {
     try {

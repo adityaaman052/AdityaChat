@@ -3,18 +3,17 @@ import styled from "styled-components";
 import Logo from "../assets/wechat.png";
 
 export default function Contacts({ contacts, changeChat }) {
-  const [currentUserName, setCurrentUserName] = useState(undefined);
-  const [currentUserImage, setCurrentUserImage] = useState(undefined);
+  const [currentUser, setCurrentUser] = useState({ username: "", avatarImage: "" });
   const [currentSelected, setCurrentSelected] = useState(undefined);
-  const [loading, setLoading] = useState(true); // Loading state for fetching user data
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
-    if (data) {
-      setCurrentUserName(data.username);
-      setCurrentUserImage(data.avatarImage);
-      setLoading(false);
+    const storedUser = localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY);
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setCurrentUser({ username: userData.username, avatarImage: userData.avatarImage });
     }
+    setLoading(false);
   }, []);
 
   const changeCurrentChat = (index, contact) => {
@@ -23,45 +22,37 @@ export default function Contacts({ contacts, changeChat }) {
   };
 
   if (loading) {
-    return <LoadingMessage>Loading...</LoadingMessage>; // Display loading message while waiting for user data
+    return <LoadingMessage>Loading...</LoadingMessage>;
   }
 
   return (
     <Container>
       <div className="brand">
         <img src={Logo} alt="logo" />
-        <h3>talktime</h3>
+        <h3>TALKTIME</h3>
       </div>
       <div className="contacts">
-        {contacts.map((contact, index) => {
-          return (
-            <div
-              key={contact._id}
-              className={`contact ${index === currentSelected ? "selected" : ""}`}
-              onClick={() => changeCurrentChat(index, contact)}
-            >
-              <div className="avatar">
-                <img
-                  src={`data:image/svg+xml;base64,${contact.avatarImage}`}
-                  alt={contact.username}
-                />
-              </div>
-              <div className="username">
-                <h3>{contact.username}</h3>
-              </div>
+        {contacts.map((contact, index) => (
+          <div
+            key={contact._id}
+            className={`contact ${index === currentSelected ? "selected" : ""}`}
+            onClick={() => changeCurrentChat(index, contact)}
+          >
+            <div className="avatar">
+              <img src={`data:image/svg+xml;base64,${contact.avatarImage}`} alt={contact.username} />
             </div>
-          );
-        })}
+            <div className="username">
+              <h3>{contact.username}</h3>
+            </div>
+          </div>
+        ))}
       </div>
       <div className="current-user">
         <div className="avatar">
-          <img
-            src={`data:image/svg+xml;base64,${currentUserImage}`}
-            alt="avatar"
-          />
+          <img src={`data:image/svg+xml;base64,${currentUser.avatarImage}`} alt="avatar" />
         </div>
         <div className="username">
-          <h2>{currentUserName}</h2>
+          <h2>{currentUser.username}</h2>
         </div>
       </div>
     </Container>
@@ -123,15 +114,12 @@ const Container = styled.div`
       align-items: center;
       transition: 0.5s ease-in-out;
 
-      .avatar {
-        img {
-          height: 3rem;
-        }
+      .avatar img {
+        height: 3rem;
       }
-      .username {
-        h3 {
-          color: white;
-        }
+
+      .username h3 {
+        color: white;
       }
     }
 
@@ -147,26 +135,19 @@ const Container = styled.div`
     align-items: center;
     gap: 2rem;
 
-    .avatar {
-      img {
-        height: 4rem;
-        max-inline-size: 100%;
-      }
+    .avatar img {
+      height: 4rem;
+      max-inline-size: 100%;
     }
 
-    .username {
-      h2 {
-        color: white;
-      }
+    .username h2 {
+      color: white;
     }
 
     @media screen and (min-width: 720px) and (max-width: 1080px) {
       gap: 0.5rem;
-
-      .username {
-        h2 {
-          font-size: 1rem;
-        }
+      .username h2 {
+        font-size: 1rem;
       }
     }
   }

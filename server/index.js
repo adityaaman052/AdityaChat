@@ -11,6 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGO_URL;
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+const API_URL = process.env.API_URL || "https://api.multiavatar.com";
 
 if (!MONGO_URL) {
   console.error("❌ Error: MONGO_URL is missing in .env file.");
@@ -22,7 +23,6 @@ const allowedOrigins = [CLIENT_URL, "https://localhost:3000"];
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests without an origin (e.g., Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -36,7 +36,7 @@ app.use(
   })
 );
 
-app.options("*", cors()); // Handle preflight requests for all routes
+app.options("*", cors());
 app.use(express.json());
 
 console.log("🔄 Connecting to MongoDB...");
@@ -51,11 +51,24 @@ mongoose
 app.get("/ping", (_req, res) => res.json({ msg: "Ping Successful" }));
 app.get("/", (req, res) => res.send("🚀 Welcome to Aditya Chat API!"));
 
+app.get("/api/avatar/:id", async (req, res) => {
+  try {
+    const avatarUrl = `${API_URL}/${req.params.id}`;
+    const response = await fetch(avatarUrl);
+    const svg = await response.text();
+    res.setHeader("Content-Type", "image/svg+xml");
+    res.send(svg);
+  } catch (error) {
+    console.error("❌ Error fetching avatar:", error);
+    res.status(500).json({ error: "Failed to fetch avatar" });
+  }
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
-
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+const HOST = "0.0.0.0";
+const server = app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on http://${HOST}:${PORT}`);
 });
 
 const io = socket(server, {
